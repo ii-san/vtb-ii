@@ -29,6 +29,7 @@ export default [
 	layout("components/layouts/dashboard.tsx", [
 		index("routes/dashboard/index.tsx"),
 		route("patients", "routes/patients/index.tsx"),
+		route("patients/:patientId", "routes/patients/details.tsx"),
 		route("chat", "routes/assistant.tsx"),
 	]),
 
