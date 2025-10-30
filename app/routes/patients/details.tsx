@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import {
 	Card,
@@ -5,6 +6,15 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
+import { Label } from "~/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "~/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import data from "~~/patients/clinical.json";
 import type { Route } from "./+types/details";
 export const handle = {
@@ -55,8 +65,11 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 		Survival,
 		prognosticScore,
 	} = loaderData;
+
+	const [activeTab, setActiveTab] = useState(params.detailTab || "clinical");
+
 	return (
-		<>
+		<div>
 			<div className="px-4 lg:px-6 py-4">
 				<h2 className="text-lg leading-none font-semibold">
 					Patient: {params.patientId}{" "}
@@ -65,6 +78,7 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 					{Diagnosis} - {Gender}, Age {Math.floor(+Age)}
 				</h3>
 			</div>
+			{/* Patient Summary */}
 			<div className="px-4 lg:px-6 py-4">
 				<div className="bg-card text-card-foreground grid grid-cols-5 gap-4 rounded-xl border shadow-sm">
 					<div className="px-4 lg:px-6 py-4">
@@ -109,6 +123,80 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 					</div>
 				</div>
 			</div>
-		</>
+
+			{/* Patient Tabs */}
+			<Tabs
+				defaultValue={activeTab}
+				className="w-full flex-col justify-start gap6"
+			>
+				<div className="flex items-center justify-between px-4 lg:px-6">
+					<Label htmlFor="view-selector" className="sr-only">
+						View
+					</Label>
+					<Select defaultValue={activeTab}>
+						<SelectTrigger
+							className="flex w-fit @4xl/main:hidden"
+							size="sm"
+							id="view-selector"
+						>
+							<SelectValue placeholder="Select a view" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="clinical">Clinical Overview</SelectItem>
+							<SelectItem value="molecular">Molecular Profile</SelectItem>
+							<SelectItem value="network">Network Analysis</SelectItem>
+							<SelectItem value="comprehensive">
+								Comprehensive Report
+							</SelectItem>
+							<SelectItem value="spoke">SPOKE Analysis</SelectItem>
+							<SelectItem value="similar">Similar Patients</SelectItem>
+						</SelectContent>
+					</Select>
+					<TabsList className="hidden @4xl/main:flex">
+						<TabsTrigger value="clinical">Clinical Overview</TabsTrigger>
+						<TabsTrigger value="molecular">Molecular Profile</TabsTrigger>
+						<TabsTrigger value="network">Network Analysis</TabsTrigger>
+						<TabsTrigger value="comprehensive">
+							Comprehensive Report
+						</TabsTrigger>
+						<TabsTrigger value="spoke">SPOKE Analysis</TabsTrigger>
+						<TabsTrigger value="similar">Similar Patients</TabsTrigger>
+					</TabsList>
+				</div>
+				<TabsContent value="clinical" className="flex flex-col px-4 lg:px-6">
+					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
+						clinical
+					</div>
+				</TabsContent>
+				<TabsContent value="molecular" className="flex flex-col px-4 lg:px-6">
+					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
+						molecular
+					</div>
+				</TabsContent>
+				<TabsContent value="network" className="flex flex-col px-4 lg:px-6">
+					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
+						network
+					</div>
+				</TabsContent>
+				<TabsContent
+					value="comprehensive"
+					className="flex flex-col px-4 lg:px-6"
+				>
+					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
+						comprehensive
+					</div>
+				</TabsContent>
+				<TabsContent value="spoke" className="flex flex-col px-4 lg:px-6">
+					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
+						spoke
+					</div>
+				</TabsContent>
+				<TabsContent value="similar" className="flex flex-col px-4 lg:px-6">
+					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
+						similar
+					</div>
+				</TabsContent>
+			</Tabs>
+		</div>
 	);
 }

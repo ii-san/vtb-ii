@@ -7,17 +7,9 @@ import {
 
 import {
 	IconBrain,
-	IconCamera,
 	IconChartBar,
-	IconDashboard,
-	IconDatabase,
-	IconFileAi,
-	IconFileDescription,
-	IconFileWord,
 	IconFirstAidKit,
-	IconFolder,
 	IconHelp,
-	IconListDetails,
 	IconPills,
 	IconReport,
 	IconSearch,
@@ -29,7 +21,7 @@ export default [
 	layout("components/layouts/dashboard.tsx", [
 		index("routes/dashboard/index.tsx"),
 		route("patients", "routes/patients/index.tsx"),
-		route("patients/:patientId", "routes/patients/details.tsx"),
+		route("patients/:patientId/:detailTab?", "routes/patients/details.tsx"),
 		route("chat", "routes/assistant.tsx"),
 	]),
 
