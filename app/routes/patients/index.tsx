@@ -24,7 +24,7 @@ export const handle = {
 
 export default function Page() {
 	return (
-		<div className="px-4 lg:px-6">
+		<div className="px-4 lg:px-6 py-4">
 			<Table>
 				<TableCaption>Current patients with profiles.</TableCaption>
 				<TableHeader>
