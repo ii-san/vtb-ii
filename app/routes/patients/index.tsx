@@ -51,7 +51,7 @@ export default function Page() {
 							<TableCell className="text-right">
 								<Badge
 									variant={
-										patient.Status == "Deceased" ? "destructive" : "default"
+										patient.Status === "Deceased" ? "destructive" : "default"
 									}
 								>
 									{patient.Status}
