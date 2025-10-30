@@ -16,7 +16,9 @@ export default function Page() {
 			<AppSidebar variant="inset" />
 			<SidebarInset>
 				<SiteHeader />
-				<Outlet />
+				<div className="@container/main flex flex-1 flex-col gap-2">
+					<Outlet />
+				</div>
 			</SidebarInset>
 		</SidebarProvider>
 	);
