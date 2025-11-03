@@ -9,9 +9,10 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import data from "~~/patients/clinical.json";
-import type { Route } from "./+types/details";
+import type { Patient } from "~/services/patientService";
+import patientService from "~/services/patientService";
 
+import type { Route } from "./+types/details";
 import ClinicalOverview from "./section-clinical";
 import MolecularProfile from "./section-molecular";
 import NetworkAnalysis from "./section-network";
@@ -23,7 +24,7 @@ export const handle = {
 	pageName: "Patient Details",
 };
 
-const getPrognosticScore = (patient) => {
+const getPrognosticScore = (patient: Patient) => {
 	let score = 50; // Base score of 50 (neutral prognosis)
 
 	// Age factor (older a	ge associated with worse prognosis)
@@ -49,24 +50,18 @@ const getPrognosticScore = (patient) => {
 };
 
 export async function loader({ params }: Route.LoaderArgs) {
-	const clinicalDetails = await data.filter(
-		(patient) => patient.patient_id === params.patientId,
-	)[0];
-	const prognosticScore = getPrognosticScore(clinicalDetails);
-	return { prognosticScore, ...clinicalDetails };
+	const clinical = await patientService
+		.getPatientClinical(params.patientId)
+		.then((patient) => {
+			const prognosticScore = getPrognosticScore(patient!);
+			return { prognosticScore, ...patient };
+		});
+
+	return { clinical };
 }
 
 export default function Page({ params, loaderData }: Route.ComponentProps) {
-	const {
-		Status,
-		Gender,
-		Age,
-		Diagnosis,
-		IDH_Mutation,
-		MGMT_Methylation,
-		Survival,
-		prognosticScore,
-	} = loaderData;
+	const { clinical } = loaderData;
 
 	const [activeTab, setActiveTab] = useState(params.detailTab || "clinical");
 
@@ -77,7 +72,8 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 					Patient: {params.patientId}{" "}
 				</h2>
 				<h3 className="text-muted-foreground text-sm">
-					{Diagnosis} - {Gender}, Age {Math.floor(+Age)}
+					{clinical.Diagnosis} - {clinical.Gender}, Age{" "}
+					{Math.floor(+clinical.Age)}
 				</h3>
 			</div>
 			{/* Patient Summary */}
@@ -87,25 +83,33 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 						<h4 className="text-base leading-none font-semibold mb-1">
 							Status
 						</h4>
-						<Badge variant={Status === "Deceased" ? "destructive" : "default"}>
-							{Status}
+						<Badge
+							variant={
+								clinical.Status === "Deceased" ? "destructive" : "default"
+							}
+						>
+							{clinical.Status}
 						</Badge>
 					</div>
 					<div className="px-4 lg:px-6 py-4">
 						<h4 className="text-base leading-none font-semibold mb-1">
 							Survival
 						</h4>
-						<Badge variant="outline">{Math.round(+Survival)} Months</Badge>
+						<Badge variant="outline">
+							{Math.round(+clinical.Survival)} Months
+						</Badge>
 					</div>
 					<div className="px-4 lg:px-6 py-4">
 						<h4 className="text-base leading-none font-semibold mb-1">
 							IDH Status
 						</h4>
-						<Badge>{IDH_Mutation === "wt" ? "Wild-type" : "Mutated"}</Badge>
+						<Badge>
+							{clinical.IDH_Mutation === "wt" ? "Wild-type" : "Mutated"}
+						</Badge>
 					</div>
 					<div className="px-4 lg:px-6 py-4">
 						<h4 className="text-base leading-none font-semibold mb-1">MGMT</h4>
-						<Badge>{MGMT_Methylation}</Badge>
+						<Badge>{clinical.MGMT_Methylation}</Badge>
 					</div>
 					<div className="px-4 lg:px-6 py-4">
 						<h4 className="text-base leading-none font-semibold mb-1">
@@ -113,14 +117,14 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 						</h4>
 						<Badge
 							className={
-								prognosticScore >= 70
+								clinical.prognosticScore >= 70
 									? "bg-success"
-									: prognosticScore >= 40
+									: clinical.prognosticScore >= 40
 										? "bg-warning"
 										: "bg-error"
 							}
 						>
-							{prognosticScore}/100
+							{clinical.prognosticScore}/100
 						</Badge>
 					</div>
 				</div>
@@ -164,7 +168,7 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 				</div>
 				<TabsContent value="clinical" className="flex flex-col px-4 lg:px-6">
 					<Suspense fallback={<SkeletonCard />}>
-						<ClinicalOverview />
+						<ClinicalOverview clinical={clinical} />
 					</Suspense>
 				</TabsContent>
 				<TabsContent value="molecular" className="flex flex-col px-4 lg:px-6">
