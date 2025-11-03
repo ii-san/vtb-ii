@@ -1,11 +1,5 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Badge } from "~/components/ui/badge";
-import {
-	Card,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import {
 	Select,
@@ -17,6 +11,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import data from "~~/patients/clinical.json";
 import type { Route } from "./+types/details";
+
+import ClinicalOverview from "./section-clinical";
+import MolecularProfile from "./section-molecular";
+import NetworkAnalysis from "./section-network";
+import ComprehensiveReport from "./section-report";
+import SimilarPatients from "./section-similar";
+import { SkeletonCard } from "./section-skeleton";
+
 export const handle = {
 	pageName: "Patient Details",
 };
@@ -24,7 +26,7 @@ export const handle = {
 const getPrognosticScore = (patient) => {
 	let score = 50; // Base score of 50 (neutral prognosis)
 
-	// Age factor (older age associated with worse prognosis)
+	// Age factor (older a	ge associated with worse prognosis)
 	if (patient.Age > 65)
 		score -= 15; // Elderly patients: -15 points
 	else if (patient.Age > 50) score -= 8; // Middle-aged patients: -8 points
@@ -126,14 +128,15 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 
 			{/* Patient Tabs */}
 			<Tabs
-				defaultValue={activeTab}
+				onValueChange={setActiveTab}
+				value={activeTab}
 				className="w-full flex-col justify-start gap6"
 			>
 				<div className="flex items-center justify-between px-4 lg:px-6">
 					<Label htmlFor="view-selector" className="sr-only">
 						View
 					</Label>
-					<Select defaultValue={activeTab}>
+					<Select onValueChange={setActiveTab} value={activeTab}>
 						<SelectTrigger
 							className="flex w-fit @4xl/main:hidden"
 							size="sm"
@@ -145,10 +148,8 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 							<SelectItem value="clinical">Clinical Overview</SelectItem>
 							<SelectItem value="molecular">Molecular Profile</SelectItem>
 							<SelectItem value="network">Network Analysis</SelectItem>
-							<SelectItem value="comprehensive">
-								Comprehensive Report
-							</SelectItem>
-							<SelectItem value="spoke">SPOKE Analysis</SelectItem>
+							<SelectItem value="report">Comprehensive Report</SelectItem>
+							{/* <SelectItem value="spoke">SPOKE Analysis</SelectItem> */}
 							<SelectItem value="similar">Similar Patients</SelectItem>
 						</SelectContent>
 					</Select>
@@ -156,45 +157,40 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 						<TabsTrigger value="clinical">Clinical Overview</TabsTrigger>
 						<TabsTrigger value="molecular">Molecular Profile</TabsTrigger>
 						<TabsTrigger value="network">Network Analysis</TabsTrigger>
-						<TabsTrigger value="comprehensive">
-							Comprehensive Report
-						</TabsTrigger>
-						<TabsTrigger value="spoke">SPOKE Analysis</TabsTrigger>
+						<TabsTrigger value="report">Comprehensive Report</TabsTrigger>
+						{/* <TabsTrigger value="spoke">SPOKE Analysis</TabsTrigger> */}
 						<TabsTrigger value="similar">Similar Patients</TabsTrigger>
 					</TabsList>
 				</div>
 				<TabsContent value="clinical" className="flex flex-col px-4 lg:px-6">
-					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
-						clinical
-					</div>
+					<Suspense fallback={<SkeletonCard />}>
+						<ClinicalOverview />
+					</Suspense>
 				</TabsContent>
 				<TabsContent value="molecular" className="flex flex-col px-4 lg:px-6">
-					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
-						molecular
-					</div>
+					<Suspense fallback={<SkeletonCard />}>
+						<MolecularProfile />
+					</Suspense>
 				</TabsContent>
 				<TabsContent value="network" className="flex flex-col px-4 lg:px-6">
-					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
-						network
-					</div>
+					<Suspense fallback={<SkeletonCard />}>
+						<NetworkAnalysis />
+					</Suspense>
 				</TabsContent>
-				<TabsContent
-					value="comprehensive"
-					className="flex flex-col px-4 lg:px-6"
-				>
-					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
-						comprehensive
-					</div>
+				<TabsContent value="report" className="flex flex-col px-4 lg:px-6">
+					<Suspense fallback={<SkeletonCard />}>
+						<ComprehensiveReport />
+					</Suspense>
 				</TabsContent>
-				<TabsContent value="spoke" className="flex flex-col px-4 lg:px-6">
+				{/* <TabsContent value="spoke" className="flex flex-col px-4 lg:px-6">
 					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
 						spoke
 					</div>
-				</TabsContent>
+				</TabsContent> */}
 				<TabsContent value="similar" className="flex flex-col px-4 lg:px-6">
-					<div className="aspect-video w-full flex-1 rounded-lg border border-dashed">
-						similar
-					</div>
+					<Suspense fallback={<SkeletonCard />}>
+						<SimilarPatients />
+					</Suspense>
 				</TabsContent>
 			</Tabs>
 		</div>

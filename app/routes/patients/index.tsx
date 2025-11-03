@@ -6,7 +6,6 @@ import {
 	TableBody,
 	TableCaption,
 	TableCell,
-	TableFooter,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -17,10 +16,6 @@ import data from "~~/patients/clinical.json";
 export const handle = {
 	pageName: "Patients",
 };
-
-// export default function Page() {
-// 	return <div>Here are some patients</div>;
-// }
 
 export default function Page() {
 	return (
@@ -65,12 +60,6 @@ export default function Page() {
 						</TableRow>
 					))}
 				</TableBody>
-				{/* <TableFooter>
-					<TableRow>
-						<TableCell colSpan={3}>Total</TableCell>
-						<TableCell className="text-right">$2,500.00</TableCell>
-					</TableRow>
-				</TableFooter> */}
 			</Table>
 		</div>
 	);
