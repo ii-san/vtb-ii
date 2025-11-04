@@ -1,5 +1,6 @@
 import APIS from "./endpoints";
 
+// Treatment Types
 export interface Treatment {
 	treatment_id: number;
 	treatment_order: number;
@@ -28,6 +29,49 @@ export interface TreatmentHistoryData {
 	treatments: Treatment[];
 	summary: TreatmentSummary;
 	timestamp: string;
+}
+
+// Similar Patient Types
+export interface SimilarPatient {
+	patient_id: string;
+	overall_similarity: number;
+	dcna_similarity: number;
+	mutation_similarity: number;
+	clinical_similarity: number;
+	network_similarity: number;
+	shared_mutations: string[];
+	similar_therapies: Array<{
+		therapy_name: string;
+		activity_score: number;
+		therapy_type: string;
+	}>;
+	clinical_outcomes: Record<string, any>;
+}
+
+export interface TherapyRecommendation {
+	therapy_name: string;
+	recommendation_score: number;
+	supporting_patients: number;
+	max_similarity: number;
+	evidence_strength: "high" | "medium" | "low";
+}
+
+interface SimilarityAnalysis {
+	query_patient_id: string;
+	similar_patients: SimilarPatient[];
+	similarity_summary: {
+		total_similar_patients: number;
+		avg_overall_similarity: number;
+		avg_dcna_similarity: number;
+		avg_mutation_similarity: number;
+		avg_clinical_similarity: number;
+		avg_network_similarity: number;
+		most_similar_patient: string;
+		highest_similarity_score: number;
+	};
+	therapy_recommendations: TherapyRecommendation[];
+	ai_assessment: string;
+	analysis_timestamp: string;
 }
 
 class VtbService {
@@ -64,7 +108,9 @@ class VtbService {
 	}
 
 	// Get patient Treatemnt data
-	async getPatientTreatments(patientId: string): Promise<TreatmentHistoryData> {
+	async getPatientTreatments(
+		patientId: string,
+	): Promise<TreatmentHistoryData | null> {
 		const cacheKey = `treatment_${patientId}`;
 		if (this.cache.has(cacheKey)) {
 			return this.cache.get(cacheKey);
@@ -78,7 +124,35 @@ class VtbService {
 			return data;
 		} catch (error) {
 			console.error(`Failed to load treatment history ${patientId}:`, error);
-			// return null;
+			return null;
+		}
+	}
+
+	// Get silimar patient data
+	async getSimilarPatients(
+		patientId: string,
+	): Promise<SimilarityAnalysis | null> {
+		const cacheKey = `similar_${patientId}`;
+		if (this.cache.has(cacheKey)) {
+			return this.cache.get(cacheKey);
+		}
+
+		try {
+			const data = await this.apiCall(`/patients-like-me/${patientId}`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ analysis_type: "patients_like_me" }),
+			});
+			// This api has a weird signature
+			const payload = data.patients_like_me;
+			this.cache.set(cacheKey, payload);
+			return payload;
+		} catch (error) {
+			console.error(
+				`Error loading simliar patients for patient ${patientId}:`,
+				error,
+			);
+			return null;
 		}
 	}
 
