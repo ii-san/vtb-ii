@@ -29,6 +29,21 @@ export interface Mutation {
 	Exon: string;
 }
 
+export interface DCNAData {
+	drug_name: string;
+	dcna_score: number;
+	mechanism_of_action: string;
+	approved_symbol: string;
+	clinical_phase: number;
+	is_approved: boolean;
+}
+
+export interface RegulonActivity {
+	regulon_id: number;
+	activity_score: number;
+	activity_status: string;
+}
+
 class PatientService {
 	baseURL: string;
 	cache: Map<string, any>;
@@ -125,7 +140,9 @@ class PatientService {
 	}
 
 	// Get patient regulon activity data
-	async getPatientRegulonActivity(patientId: string) {
+	async getPatientRegulonActivity(
+		patientId: string,
+	): Promise<RegulonActivity[]> {
 		const cacheKey = `regulon_${patientId}`;
 		if (this.cache.has(cacheKey)) {
 			return this.cache.get(cacheKey);
@@ -218,7 +235,7 @@ class PatientService {
 	}
 
 	// Get enriched SATGBM data with drug information
-	async getEnrichedSATGBMData(patientId: string) {
+	async getEnrichedSATGBMData(patientId: string): Promise<DCNAData[]> {
 		const cacheKey = `enriched_satgbm_${patientId}`;
 		if (this.cache.has(cacheKey)) {
 			return this.cache.get(cacheKey);
