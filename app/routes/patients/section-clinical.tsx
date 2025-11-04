@@ -1,3 +1,10 @@
+import { IconEyeTable } from "@tabler/icons-react";
+import {
+	DropletIcon,
+	RadiationIcon,
+	SliceIcon,
+	TabletIcon,
+} from "lucide-react";
 import { use } from "react";
 import { Badge } from "~/components/ui/badge";
 import {
@@ -7,12 +14,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import { Progress } from "~/components/ui/progress";
 import { Separator } from "~/components/ui/separator";
+import type { Treatment } from "~/services/vtbService";
 import type { Route } from "./+types/details";
 
 interface ClinicalOverviewProps {
 	clinical: Route.ComponentProps["loaderData"]["clinical"];
+	treatmentsPromise: Route.ComponentProps["loaderData"]["treatments"];
 }
 
 function RiskTable({
@@ -98,8 +106,100 @@ function RiskTable({
 	);
 }
 
-function ClinicalOverview({ clinical }: ClinicalOverviewProps) {
-	// const {clinical} = {props}
+function TreatmentTable({ treatments }: { treatments: Treatment[] }) {
+	return (
+		<table className="table table-md">
+			<thead>
+				<tr>
+					<th>Order</th>
+					<th>Treatment</th>
+					<th>Type</th>
+					<th>Drugs</th>
+					{/* <th>Details</th> */}
+				</tr>
+			</thead>
+			<tbody>
+				{treatments.map((treatment) => (
+					<tr key={treatment.treatment_id}>
+						<td>#{treatment.treatment_order}</td>
+						<td>
+							<strong>{treatment.treatment_name}</strong>
+						</td>
+						<td>
+							{{
+								Surgery: (
+									<Badge variant="secondary">
+										<SliceIcon /> {treatment.treatment_type}
+									</Badge>
+								),
+								Radiation: (
+									<Badge variant="secondary">
+										<RadiationIcon /> {treatment.treatment_type}
+									</Badge>
+								),
+								Chemotherapy: (
+									<Badge variant="secondary">
+										<DropletIcon /> {treatment.treatment_type}
+									</Badge>
+								),
+								"Clinical Trial": (
+									<Badge variant="secondary">
+										<IconEyeTable /> {treatment.treatment_type}
+									</Badge>
+								),
+								"Device Therapy": (
+									<Badge variant="secondary">
+										<TabletIcon /> {treatment.treatment_type}
+									</Badge>
+								),
+							}[treatment.treatment_type] || (
+								<Badge variant="secondary">{treatment.treatment_type}</Badge>
+							)}
+						</td>
+						<td>
+							{treatment.drugs.length > 0 ? (
+								<div>
+									{treatment.drugs.map((drug, index) => (
+										<Badge key={index} variant="outline" className="mx-1">
+											{drug}
+										</Badge>
+									))}
+								</div>
+							) : (
+								<span className="text-muted">No drugs</span>
+							)}
+						</td>
+						{/* <td>
+							<div>
+								{treatment.is_trial && (
+									<Badge variant="secondary">
+										<IconEyeTable /> Clinical Trial
+									</Badge>
+								)}
+								{treatment.is_surgery && (
+									<Badge>
+										<SliceIcon /> Surgery
+									</Badge>
+								)}
+								{treatment.is_radiation && (
+									<Badge>
+										<RadiationIcon /> Radiation
+									</Badge>
+								)}
+							</div>
+						</td> */}
+					</tr>
+				))}
+			</tbody>
+		</table>
+	);
+}
+
+function ClinicalOverview({
+	clinical,
+	treatmentsPromise,
+}: ClinicalOverviewProps) {
+	const { treatments, summary } = use(treatmentsPromise);
 	return (
 		<div>
 			<div className="w-full grid grid-cols-6 gap-4 mb-4">
@@ -228,7 +328,56 @@ function ClinicalOverview({ clinical }: ClinicalOverviewProps) {
 					<CardHeader>
 						<CardTitle>Treatment History</CardTitle>
 					</CardHeader>
-					<CardContent>####</CardContent>
+					<CardContent>
+						{/* Treatment summary */}
+						<div className="stats w-full bg-card text-card-foreground4">
+							<div className="stat">
+								<div className="stat-title">Chemotherapy</div>
+								<div className="stat-value">
+									{summary.chemotherapy_treatments}
+								</div>
+							</div>
+							<div className="stat">
+								<div className="stat-title">Radiation</div>
+								<div className="stat-value">{summary.radiation_treatments}</div>
+							</div>
+							<div className="stat">
+								<div className="stat-title">Surgeries</div>
+								<div className="stat-value">{summary.surgeries}</div>
+							</div>
+							<div className="stat">
+								<div className="stat-title">Clinical Trials</div>
+								<div className="stat-value">{summary.clinical_trials}</div>
+							</div>
+							<div className="stat">
+								<div className="stat-title">Device Therapy</div>
+								<div className="stat-value">{summary.device_therapies}</div>
+							</div>
+							<div className="stat">
+								<div className="stat-title">Unique Drugs</div>
+								<div className="stat-value">{summary.unique_drug_count}</div>
+							</div>
+						</div>
+
+						{/* Treatment Drug list */}
+						<TreatmentTable treatments={treatments} />
+
+						{/* Unique Drugs Summary */}
+						{summary.unique_drugs.length > 0 && (
+							<div className="mt-4">
+								<h4 className="text-muted-foreground text-sm">
+									All Drugs Used ({summary.unique_drug_count})
+								</h4>
+								<div>
+									{summary.unique_drugs.map((drug, index) => (
+										<Badge key={index} variant="outline" className="mx-1">
+											{drug}
+										</Badge>
+									))}
+								</div>
+							</div>
+						)}
+					</CardContent>
 				</Card>
 			</div>
 

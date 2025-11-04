@@ -11,6 +11,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import type { Patient } from "~/services/patientService";
 import patientService from "~/services/patientService";
+import vtbService from "~/services/vtbService";
 
 import type { Route } from "./+types/details";
 import ClinicalOverview from "./section-clinical";
@@ -50,6 +51,8 @@ const getPrognosticScore = (patient: Patient) => {
 };
 
 export async function loader({ params }: Route.LoaderArgs) {
+	const treatments = vtbService.getPatientTreatments(params.patientId);
+
 	const clinical = await patientService
 		.getPatientClinical(params.patientId)
 		.then((patient) => {
@@ -57,7 +60,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 			return { prognosticScore, ...patient };
 		});
 
-	return { clinical };
+	return { clinical, treatments };
 }
 
 export default function Page({ params, loaderData }: Route.ComponentProps) {
@@ -168,7 +171,10 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 				</div>
 				<TabsContent value="clinical" className="flex flex-col px-4 lg:px-6">
 					<Suspense fallback={<SkeletonCard />}>
-						<ClinicalOverview clinical={clinical} />
+						<ClinicalOverview
+							clinical={clinical}
+							treatmentsPromise={loaderData.treatments!}
+						/>
 					</Suspense>
 				</TabsContent>
 				<TabsContent value="molecular" className="flex flex-col px-4 lg:px-6">
