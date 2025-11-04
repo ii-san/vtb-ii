@@ -17,6 +17,18 @@ export interface Patient {
 	XRT: string;
 }
 
+export interface Mutation {
+	Gene: string;
+	Protein_Change: string;
+	Function_Class: string;
+	Clinical_Interpretation: string;
+	CHROM: string;
+	POS: number;
+	DNA_Change: string;
+	Location: string;
+	Exon: string;
+}
+
 class PatientService {
 	baseURL: string;
 	cache: Map<string, any>;
@@ -73,7 +85,7 @@ class PatientService {
 	}
 
 	// Get patient mutations data
-	async getPatientMutations(patientId: string) {
+	async getPatientMutations(patientId: string): Promise<Mutation[]> {
 		const cacheKey = `mutations_${patientId}`;
 		if (this.cache.has(cacheKey)) {
 			return this.cache.get(cacheKey);
