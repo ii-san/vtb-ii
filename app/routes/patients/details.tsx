@@ -53,6 +53,8 @@ const getPrognosticScore = (patient: Patient) => {
 export async function loader({ params }: Route.LoaderArgs) {
 	const treatments = vtbService.getPatientTreatments(params.patientId);
 
+	const molecular = patientService.getPatientMutations(params.patientId);
+
 	const clinical = await patientService
 		.getPatientClinical(params.patientId)
 		.then((patient) => {
@@ -60,7 +62,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 			return { prognosticScore, ...patient };
 		});
 
-	return { clinical, treatments };
+	return { clinical, treatments, molecular };
 }
 
 export default function Page({ params, loaderData }: Route.ComponentProps) {
@@ -179,7 +181,7 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 				</TabsContent>
 				<TabsContent value="molecular" className="flex flex-col px-4 lg:px-6">
 					<Suspense fallback={<SkeletonCard />}>
-						<MolecularProfile />
+						<MolecularProfile mutationsPromise={loaderData.molecular!} />
 					</Suspense>
 				</TabsContent>
 				<TabsContent value="network" className="flex flex-col px-4 lg:px-6">

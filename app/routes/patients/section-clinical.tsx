@@ -51,7 +51,7 @@ function RiskTable({
 		},
 	];
 	return (
-		<table className="table table-md">
+		<table className="table table-sm">
 			{/* head */}
 			<thead>
 				<tr>
@@ -108,7 +108,7 @@ function RiskTable({
 
 function TreatmentTable({ treatments }: { treatments: Treatment[] }) {
 	return (
-		<table className="table table-md">
+		<table className="table table-sm">
 			<thead>
 				<tr>
 					<th>Order</th>
