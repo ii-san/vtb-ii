@@ -57,6 +57,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 		dcna: patientService.getEnrichedSATGBMData(params.patientId),
 		regulon: patientService.getPatientRegulonActivity(params.patientId),
 	};
+	const similarPatients = vtbService.getSimilarPatients(params.patientId);
 
 	const clinical = await patientService
 		.getPatientClinical(params.patientId)
@@ -65,7 +66,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 			return { prognosticScore, ...patient };
 		});
 
-	return { clinical, treatments, molecular, networkData };
+	return { clinical, treatments, molecular, networkData, similarPatients };
 }
 
 export default function Page({ params, loaderData }: Route.ComponentProps) {
@@ -207,7 +208,7 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 				</TabsContent> */}
 				<TabsContent value="similar" className="flex flex-col px-4 lg:px-6">
 					<Suspense fallback={<SkeletonCard />}>
-						<SimilarPatients />
+						<SimilarPatients similarPromise={loaderData.similarPatients} />
 					</Suspense>
 				</TabsContent>
 			</Tabs>
