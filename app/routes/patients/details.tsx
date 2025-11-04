@@ -52,8 +52,11 @@ const getPrognosticScore = (patient: Patient) => {
 
 export async function loader({ params }: Route.LoaderArgs) {
 	const treatments = vtbService.getPatientTreatments(params.patientId);
-
 	const molecular = patientService.getPatientMutations(params.patientId);
+	const networkData = {
+		dcna: patientService.getEnrichedSATGBMData(params.patientId),
+		regulon: patientService.getPatientRegulonActivity(params.patientId),
+	};
 
 	const clinical = await patientService
 		.getPatientClinical(params.patientId)
@@ -62,7 +65,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 			return { prognosticScore, ...patient };
 		});
 
-	return { clinical, treatments, molecular };
+	return { clinical, treatments, molecular, networkData };
 }
 
 export default function Page({ params, loaderData }: Route.ComponentProps) {
@@ -186,7 +189,10 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 				</TabsContent>
 				<TabsContent value="network" className="flex flex-col px-4 lg:px-6">
 					<Suspense fallback={<SkeletonCard />}>
-						<NetworkAnalysis />
+						<NetworkAnalysis
+							dcnaPromise={loaderData.networkData.dcna}
+							regulonsPromise={loaderData.networkData.regulon}
+						/>
 					</Suspense>
 				</TabsContent>
 				<TabsContent value="report" className="flex flex-col px-4 lg:px-6">
