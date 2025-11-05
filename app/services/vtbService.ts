@@ -74,6 +74,138 @@ interface SimilarityAnalysis {
 	analysis_timestamp: string;
 }
 
+// Giant Report Types
+interface DrugScore {
+	rank: number;
+	drug_name: string;
+	total_score: number;
+	dcna_score: number;
+	molecular_profile_score: number;
+	biomarker_score: number;
+	clinical_evidence_score: number;
+	mechanism_score: number;
+	administration_score: number;
+	interaction_score: number;
+	rationale: string;
+}
+
+interface MutationScore {
+	rank: number;
+	gene: string;
+	mutation: string;
+	total_score: number;
+	clinical_score: number;
+	prevalence_score: number;
+	therapeutic_score: number;
+	biomarker_score: number;
+	clinical_evidence_score: number;
+	mechanism_score: number;
+	prognostic_score: number;
+	rationale: string;
+	clinical_interpretation?: string;
+}
+
+interface PrognosisAssessment {
+	prognosis_score: number;
+	risk_category: string;
+	estimated_survival: string;
+	favorable_factors: string[];
+	adverse_factors: string[];
+	key_biomarkers: {
+		idh_status: string;
+		mgmt_status: string;
+		age: number;
+	};
+}
+
+export interface ClinicalTrial {
+	nct_id: string;
+	title: string;
+	status: string;
+	phase: string;
+	drug_name: string;
+	brief_summary: string;
+	indication?: string;
+	enrollment?: string | number;
+	url?: string;
+	detailed_description?: string;
+	eligibility_criteria?: string;
+	primary_outcome?: string;
+	secondary_outcome?: string;
+	study_design?: string;
+	sponsor?: string;
+	location?: string;
+	start_date?: string;
+	completion_date?: string;
+}
+
+interface PubMedArticle {
+	pmid: string;
+	title: string;
+	authors?: string;
+	source?: string;
+	pubdate?: string;
+	url: string;
+	publication_info?: string;
+}
+
+export interface LiteratureSummary {
+	drug_literature: { [drug: string]: PubMedArticle[] };
+	mutation_literature: { [gene: string]: PubMedArticle[] };
+	summary_stats: {
+		total_drug_articles: number;
+		total_mutation_articles: number;
+		drugs_with_literature: number;
+		genes_with_literature: number;
+		drugs_searched: number;
+		genes_searched: number;
+	};
+	search_metadata: {
+		search_date: string;
+		top_drugs_searched?: string[];
+		top_genes_searched?: string[];
+		drugs_count?: number;
+		genes_count?: number;
+		error?: string;
+	};
+}
+
+interface AIExecutiveSummary {
+	unified_summary?: string;
+	summary?: string;
+	patient_overview: string;
+	key_findings: string[];
+	molecular_profile?: string;
+	treatment_strategy?: string;
+	prognosis_assessment?: string;
+	next_steps: string[];
+}
+
+interface AIRecommendationsData {
+	patient_id: string;
+	query: string;
+	executive_summary: AIExecutiveSummary;
+	overall_confidence: number;
+	timestamp: string;
+	cached?: boolean;
+	session_id?: number;
+}
+
+interface ComprehensiveReportData {
+	patient_id: string;
+	patient_overview: string;
+	molecular_profile: any;
+	ranked_drugs: DrugScore[];
+	ranked_mutations: MutationScore[];
+	prognosis_assessment: PrognosisAssessment;
+	treatment_recommendations: any[];
+	next_steps: string[];
+	overall_confidence: number;
+	timestamp: string;
+	clinical_trials?: ClinicalTrial[];
+	literature_summary?: LiteratureSummary;
+}
+
 class VtbService {
 	baseURL: string;
 	cache: Map<string, any>;
@@ -156,6 +288,57 @@ class VtbService {
 		}
 	}
 
+	// Get patient report data
+	async getPatientReport(patientId: string): Promise<ComprehensiveReportData> {
+		const cacheKey = `full_report_${patientId}`;
+		if (this.cache.has(cacheKey)) {
+			return this.cache.get(cacheKey);
+		}
+
+		try {
+			const data = await this.apiCall(`/get-comprehensive-report/${patientId}`);
+			this.cache.set(cacheKey, data);
+			return data;
+		} catch (error) {
+			console.error(
+				`Failed to load comprehensive report for ${patientId}:`,
+				error,
+			);
+			return null;
+		}
+	}
+
+	// Get patient report data
+	async getAiRecommendations(
+		patientId: string,
+	): Promise<AIRecommendationsData | null> {
+		const cacheKey = `ai_recommendations_${patientId}`;
+		if (this.cache.has(cacheKey)) {
+			return this.cache.get(cacheKey);
+		}
+
+		try {
+			const data = await this.apiCall(`/recommendations/${patientId}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					query: "Provide therapy recommendations for this patient",
+					top_k: 5,
+					force_new_analysis: false,
+				}),
+			});
+			this.cache.set(cacheKey, data);
+			return data;
+		} catch (error) {
+			console.error(
+				`Failed to load ai recommendations for ${patientId}:`,
+				error,
+			);
+			return null;
+		}
+	}
 	// Clear cache (useful for refreshing data)
 	clearCache() {
 		this.cache.clear();

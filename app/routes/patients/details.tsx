@@ -58,6 +58,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 		regulon: patientService.getPatientRegulonActivity(params.patientId),
 	};
 	const similarPatients = vtbService.getSimilarPatients(params.patientId);
+	const patientReport = vtbService.getPatientReport(params.patientId);
 
 	const clinical = await patientService
 		.getPatientClinical(params.patientId)
@@ -66,7 +67,14 @@ export async function loader({ params }: Route.LoaderArgs) {
 			return { prognosticScore, ...patient };
 		});
 
-	return { clinical, treatments, molecular, networkData, similarPatients };
+	return {
+		clinical,
+		treatments,
+		molecular,
+		networkData,
+		similarPatients,
+		patientReport,
+	};
 }
 
 export default function Page({ params, loaderData }: Route.ComponentProps) {
@@ -198,7 +206,7 @@ export default function Page({ params, loaderData }: Route.ComponentProps) {
 				</TabsContent>
 				<TabsContent value="report" className="flex flex-col px-4 lg:px-6">
 					<Suspense fallback={<SkeletonCard />}>
-						<ComprehensiveReport />
+						<ComprehensiveReport reportPromise={loaderData.patientReport} />
 					</Suspense>
 				</TabsContent>
 				{/* <TabsContent value="spoke" className="flex flex-col px-4 lg:px-6">
