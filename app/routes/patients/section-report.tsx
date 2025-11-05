@@ -459,6 +459,7 @@ function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
 				</Card>
 			</div> */}
 
+			{/* Patient Overview */}
 			<div className="w-full mb-4">
 				<Card>
 					<CardHeader>
@@ -488,6 +489,7 @@ function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
 				</Card>
 			</div>
 
+			{/* Prognisis Assesment*/}
 			<div className="w-full mb-4">
 				<Card>
 					<CardHeader>
@@ -559,6 +561,7 @@ function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
 				</Card>
 			</div>
 
+			{/* Ranked Drug and Mutations */}
 			<div className="w-full grid grid-cols-2 gap-4 mb-4">
 				<Card>
 					<CardHeader>
@@ -579,6 +582,7 @@ function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
 				</Card>
 			</div>
 
+			{/* Clinical Trials */}
 			{clinical_trials && clinical_trials.length > 0 && (
 				<div className="w-full mb-4">
 					<Card>
@@ -618,6 +622,7 @@ function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
 				</div>
 			)}
 
+			{/* Literature Summary */}
 			{literature_summary && (
 				<div className="w-full mb-4">
 					<Card>
@@ -667,12 +672,73 @@ function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
 				</div>
 			)}
 
+			{/* Scoring Methodology */}
 			<div className="w-full mb-4">
 				<Card>
 					<CardHeader>
 						<CardTitle>Scoring Methodology</CardTitle>
 					</CardHeader>
-					<CardContent>####</CardContent>
+					<CardContent className="w-full grid grid-cols-2 text-sm">
+						<div>
+							<h6 className="leading-none font-semibold mb-2">
+								Drug Scoring Factors (7-Factor System)
+							</h6>
+							<ul className="**:data-[slot=badge]:bg-muted-foreground/30  **:data-[slot=badge]:px-1">
+								<li>
+									<Badge>25%</Badge> SATGBM Score - Systems Genetic Network
+									Analysis for disease progression risk and therapy prediction
+								</li>
+								<li>
+									<Badge>20%</Badge> Molecular Profile Match - Patient mutation
+									alignment
+								</li>
+								<li>
+									<Badge>15%</Badge> Biomarker Status - MGMT/IDH relevance
+								</li>
+								<li>
+									<Badge>15%</Badge> Clinical Evidence - Trial data quality
+								</li>
+								<li>
+									<Badge>12%</Badge> Mechanism of Action - GBM relevance
+								</li>
+								<li>
+									<Badge>8%</Badge> Administration - BBB penetration
+								</li>
+								<li>
+									<Badge>5%</Badge> Drug Interactions - Safety profile
+								</li>
+							</ul>
+						</div>
+						<div>
+							<h6 className="leading-none font-semibold mb-2">
+								Mutation Scoring Factors (6-Factor System)
+							</h6>
+							<ul className="**:data-[slot=badge]:bg-primary  **:data-[slot=badge]:px-1">
+								<li>
+									<Badge>40%</Badge> Clinical Interpretation - Pathogenic/VUS
+									classification
+								</li>
+								<li>
+									<Badge>15%</Badge> Mutation Prevalence - Frequency in GBM
+								</li>
+								<li>
+									<Badge>12%</Badge> Therapeutic Implications - Treatment impact
+								</li>
+								<li>
+									<Badge>9%</Badge> Biomarker Status - Clinical relevance
+								</li>
+								<li>
+									<Badge>9%</Badge> Clinical Evidence - Research support
+								</li>
+								<li>
+									<Badge>7.2%</Badge> Mechanism of Action - Tumor biology impact
+								</li>
+								<li>
+									<Badge>7.8%</Badge> Prognostic Value - Survival association
+								</li>
+							</ul>
+						</div>
+					</CardContent>
 				</Card>
 			</div>
 		</div>

@@ -75,7 +75,7 @@ interface SimilarityAnalysis {
 }
 
 // Giant Report Types
-interface DrugScore {
+export interface DrugScore {
 	rank: number;
 	drug_name: string;
 	total_score: number;
@@ -89,7 +89,7 @@ interface DrugScore {
 	rationale: string;
 }
 
-interface MutationScore {
+export interface MutationScore {
 	rank: number;
 	gene: string;
 	mutation: string;
