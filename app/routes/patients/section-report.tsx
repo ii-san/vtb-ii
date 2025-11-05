@@ -1,6 +1,6 @@
 import { IconMinus, IconPlus } from "@tabler/icons-react";
 import { DnaIcon, ExternalLinkIcon, Pill } from "lucide-react";
-import { use } from "react";
+import { use, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -11,7 +11,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-
+import { Separator } from "~/components/ui/separator";
 import {
 	Table,
 	TableBody,
@@ -21,7 +21,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
-import type { ClinicalTrial, LiteratureSummary } from "~/services/vtbService";
+import type {
+	ClinicalTrial,
+	DrugScore,
+	LiteratureSummary,
+	MutationScore,
+} from "~/services/vtbService";
 import type { Route } from "./+types/details";
 
 interface ComprehensiveReportProps {
@@ -237,12 +242,209 @@ function RecentLiteratureTable({ articles }: { articles: LiteratureSummary }) {
 	);
 }
 
+function DrugRankTable({ drugs }: { drugs: DrugScore[] }) {
+	const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+	const toggleRowExpansion = (index: number) => {
+		const newExpandedRows = new Set(expandedRows);
+		if (newExpandedRows.has(index)) {
+			newExpandedRows.delete(index);
+		} else {
+			newExpandedRows.add(index);
+		}
+		setExpandedRows(newExpandedRows);
+	};
+
+	return (
+		<Table>
+			<TableHeader>
+				<TableRow>
+					<TableHead></TableHead>
+					<TableHead>Drug</TableHead>
+					<TableHead>Score</TableHead>
+					<TableHead>SATGBM</TableHead>
+					<TableHead>Details</TableHead>
+				</TableRow>
+			</TableHeader>
+			{drugs.map((drug) => (
+				<TableBody key={drug.rank}>
+					<TableRow
+						className="cursor-pointer"
+						onClick={() => toggleRowExpansion(drug.rank)}
+					>
+						<TableCell>{drug.rank}</TableCell>
+						<TableCell>
+							<strong className="text-wrap">{drug.drug_name}</strong>
+						</TableCell>
+						<TableCell>
+							<Badge variant="secondary">
+								{(drug.total_score || 0).toFixed(3)}
+							</Badge>
+						</TableCell>
+						<TableCell>
+							<Badge variant="outline">
+								{(drug.dcna_score || 0).toFixed(3)}
+							</Badge>
+						</TableCell>
+						<TableCell>
+							<Button
+								variant="secondary"
+								onClick={() => toggleRowExpansion(drug.rank)}
+							>
+								{expandedRows.has(drug.rank) ? <IconMinus /> : <IconPlus />}
+							</Button>
+						</TableCell>
+					</TableRow>
+					<TableRow hidden={!expandedRows.has(drug.rank)}>
+						<TableCell colSpan={5} className="bg-muted/50 border-b border-t-0">
+							<div className="mb-2">
+								<small>
+									<strong>Scoring Breakdown:</strong>
+								</small>
+								<div className="flex flex-wrap gap-1">
+									<Badge variant="outline">
+										Molecular: {(drug.molecular_profile_score || 0).toFixed(2)}
+									</Badge>
+									<Badge variant="outline">
+										Biomarker: {(drug.biomarker_score || 0).toFixed(2)}
+									</Badge>
+									<Badge variant="outline">
+										Clinical: {(drug.clinical_evidence_score || 0).toFixed(2)}
+									</Badge>
+									<Badge variant="outline">
+										Mechanism: {(drug.mechanism_score || 0).toFixed(2)}
+									</Badge>
+									<Badge variant="outline">
+										Admin: {(drug.administration_score || 0).toFixed(2)}
+									</Badge>
+								</div>
+							</div>
+							<div className="text-wrap text-xs">
+								<strong>Rationale:</strong> {drug.rationale}
+							</div>
+						</TableCell>
+					</TableRow>
+				</TableBody>
+			))}
+		</Table>
+	);
+}
+
+function MutationRankTable({ mutations }: { mutations: MutationScore[] }) {
+	const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+	const toggleRowExpansion = (index: number) => {
+		const newExpandedRows = new Set(expandedRows);
+		if (newExpandedRows.has(index)) {
+			newExpandedRows.delete(index);
+		} else {
+			newExpandedRows.add(index);
+		}
+		setExpandedRows(newExpandedRows);
+	};
+
+	return (
+		<Table>
+			<TableHeader>
+				<TableRow>
+					<TableHead></TableHead>
+					<TableHead>Gene</TableHead>
+					<TableHead>Score</TableHead>
+					<TableHead>Clincal</TableHead>
+					<TableHead>Details</TableHead>
+				</TableRow>
+			</TableHeader>
+			{mutations.map((mutation) => (
+				<TableBody key={mutation.rank}>
+					<TableRow
+						className="cursor-pointer"
+						onClick={() => toggleRowExpansion(mutation.rank)}
+					>
+						<TableCell>{mutation.rank}</TableCell>
+						<TableCell>
+							<div className="flex">
+								<strong>{mutation.gene}</strong>
+								<Separator
+									orientation="vertical"
+									className="mx-2 data-[orientation=vertical]:h-4"
+								/>
+								<span className="text-muted-foreground">
+									{mutation.mutation}
+								</span>
+							</div>
+						</TableCell>
+						<TableCell>
+							<Badge variant="secondary">
+								{(mutation.total_score || 0).toFixed(3)}
+							</Badge>
+						</TableCell>
+						<TableCell>
+							<Badge variant="outline">
+								{(mutation.clinical_score || 0).toFixed(3)}
+							</Badge>
+						</TableCell>
+						<TableCell>
+							<Button
+								variant="secondary"
+								onClick={() => toggleRowExpansion(mutation.rank)}
+							>
+								{expandedRows.has(mutation.rank) ? <IconMinus /> : <IconPlus />}
+							</Button>
+						</TableCell>
+					</TableRow>
+					<TableRow hidden={!expandedRows.has(mutation.rank)}>
+						<TableCell colSpan={5} className="bg-muted/50 border-b border-t-0">
+							<div className="mb-2">
+								<small>
+									<strong>Scoring Breakdown:</strong>
+								</small>
+								<div className="flex flex-wrap gap-1">
+									<Badge variant="outline">
+										Prevalence: {(mutation.prevalence_score || 0).toFixed(2)}
+									</Badge>
+									<Badge variant="outline">
+										Therapeutic: {(mutation.therapeutic_score || 0).toFixed(2)}
+									</Badge>
+									<Badge variant="outline">
+										Biomarker: {(mutation.biomarker_score || 0).toFixed(2)}
+									</Badge>
+									<Badge variant="outline">
+										Clinical:{" "}
+										{(mutation.clinical_evidence_score || 0).toFixed(2)}
+									</Badge>
+									<Badge variant="outline">
+										Mechanism: {(mutation.mechanism_score || 0).toFixed(2)}
+									</Badge>
+									<Badge variant="outline">
+										Prognostic: {(mutation.prognostic_score || 0).toFixed(2)}
+									</Badge>
+								</div>
+							</div>
+							<div className="text-wrap text-xs">
+								<p>
+									<strong>Rationale:</strong> {mutation.rationale}
+								</p>
+								{mutation.clinical_interpretation && (
+									<p>
+										<strong>Clinical Interpretation:</strong>{" "}
+										{mutation.clinical_interpretation}
+									</p>
+								)}
+							</div>
+						</TableCell>
+					</TableRow>
+				</TableBody>
+			))}
+		</Table>
+	);
+}
+
 function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
 	const {
 		patient_overview,
 		timestamp,
 		overall_confidence,
 		prognosis_assessment,
+		ranked_drugs,
+		ranked_mutations,
 		clinical_trials,
 		literature_summary,
 	} = use(reportPromise);
@@ -362,14 +564,18 @@ function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
 					<CardHeader>
 						<CardTitle>Top Ranked Drugs</CardTitle>
 					</CardHeader>
-					<CardContent>####</CardContent>
+					<CardContent>
+						<DrugRankTable drugs={ranked_drugs.slice(0, 20)} />
+					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader>
 						<CardTitle>Top Ranked Mutations</CardTitle>
 					</CardHeader>
-					<CardContent>####</CardContent>
+					<CardContent>
+						<MutationRankTable mutations={ranked_mutations.slice(0, 20)} />
+					</CardContent>
 				</Card>
 			</div>
 
