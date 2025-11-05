@@ -311,7 +311,7 @@ class VtbService {
 	// Get patient report data
 	async getAiRecommendations(
 		patientId: string,
-	): Promise<AIRecommendationsData | null> {
+	): Promise<AIRecommendationsData> {
 		const cacheKey = `ai_recommendations_${patientId}`;
 		if (this.cache.has(cacheKey)) {
 			return this.cache.get(cacheKey);

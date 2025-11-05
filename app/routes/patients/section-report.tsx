@@ -31,6 +31,7 @@ import type { Route } from "./+types/details";
 
 interface ComprehensiveReportProps {
 	reportPromise: Route.ComponentProps["loaderData"]["patientReport"];
+	aiPromise: Route.ComponentProps["loaderData"]["aiReport"];
 }
 
 function ClinicalTrialsTable({ trials }: { trials: ClinicalTrial[] }) {
@@ -437,7 +438,10 @@ function MutationRankTable({ mutations }: { mutations: MutationScore[] }) {
 	);
 }
 
-function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
+function ComprehensiveReport({
+	reportPromise,
+	aiPromise,
+}: ComprehensiveReportProps) {
 	const {
 		patient_overview,
 		timestamp,
@@ -448,16 +452,61 @@ function ComprehensiveReport({ reportPromise }: ComprehensiveReportProps) {
 		clinical_trials,
 		literature_summary,
 	} = use(reportPromise);
+	const { executive_summary } = use(aiPromise);
+
 	return (
 		<div>
-			{/* <div className="w-full mb-4">
-				<Card>
-					<CardHeader>
-						<CardTitle>AI Executive Summary</CardTitle>
-					</CardHeader>
-					<CardContent>####</CardContent>
-				</Card>
-			</div> */}
+			{/* AI Executive Summary */}
+			{executive_summary && (
+				<div className="w-full mb-4">
+					<Card>
+						<CardHeader>
+							<CardTitle>AI Executive Summary</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="flex flex-row">
+								<div className="basis-2/3">
+									<div className="mb-3 mr-3 whitespace-pre-line text-sm">
+										{executive_summary.unified_summary ||
+											executive_summary.summary ||
+											executive_summary.treatment_strategy ||
+											executive_summary.patient_overview}
+									</div>
+								</div>
+								<div className="basis-1/3">
+									{executive_summary?.key_findings?.length > 0 && (
+										<>
+											<h6 className="">Key Findings</h6>
+											<ul className="list-disc list-inside">
+												{executive_summary.key_findings.map(
+													(finding, index) => (
+														<li key={index} className="mb-1">
+															<small>{finding}</small>
+														</li>
+													),
+												)}
+											</ul>
+										</>
+									)}
+
+									{executive_summary?.next_steps?.length > 0 && (
+										<>
+											<h6 className="">Next Steps</h6>
+											<ul className="list-disc list-inside">
+												{executive_summary.next_steps.map((finding, index) => (
+													<li key={index} className="mb-1">
+														<small>{finding}</small>
+													</li>
+												))}
+											</ul>
+										</>
+									)}
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			)}
 
 			{/* Patient Overview */}
 			<div className="w-full mb-4">
