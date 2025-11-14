@@ -26,6 +26,7 @@ export default [
 	]),
 
 	route("api/chat", "routes/api/chat.ts"),
+	route("api/settings", "routes/actions/preferences.ts"),
 ] satisfies RouteConfig;
 
 export const RouteNav = {

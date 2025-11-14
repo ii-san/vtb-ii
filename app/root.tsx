@@ -10,6 +10,7 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { getSession } from "./sessions.server";
 
 function ClientTheme() {
 	return (
@@ -49,7 +50,8 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const ssrTheme = null;
+	const session = await getSession(request.headers.get("Cookie"));
+	const ssrTheme = session.get("theme");
 	return { ssrTheme };
 }
 
@@ -68,7 +70,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<Meta />
 				<Links />
-				{ssrTheme ? null : <ClientTheme />}
+				<ClientTheme />
 			</head>
 			<body>
 				{children}

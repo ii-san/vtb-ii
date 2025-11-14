@@ -9,6 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "../ui/select";
+import { ThemeToggle } from "./theme-toggle";
 
 interface pageMeta extends UIMatch {
 	handle: {
@@ -39,6 +40,7 @@ export function SiteHeader() {
 				/>
 				<h1 className="text-base font-medium">{pageName}</h1>
 				<div className="ml-auto flex items-center gap-2">
+					<ThemeToggle />
 					{pageName === "Patient Details" && (
 						<Select onValueChange={hackyPatientNav}>
 							<SelectTrigger>
