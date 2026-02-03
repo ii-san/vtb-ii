@@ -11,6 +11,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import type { Patient } from "~/services/patientService";
 import patientService from "~/services/patientService";
+import { api } from "~/services/vtbClient";
 import vtbService from "~/services/vtbService";
 
 import type { Route } from "./+types/details";
@@ -61,8 +62,21 @@ export async function loader({ params }: Route.LoaderArgs) {
 	const patientReport = vtbService.getPatientReport(params.patientId);
 	const aiReport = vtbService.getAiRecommendations(params.patientId);
 
-	const clinical = await patientService
-		.getPatientClinical(params.patientId)
+	// const vtbPatient = await api.get("/patients/{patient_id}/clinical", {
+	// 	path: { patient_id: params.patientId },
+	// });
+
+	// const clinical = await patientService
+	// 	.getPatientClinical(params.patientId)
+	// 	.then((patient) => {
+	// 		const prognosticScore = getPrognosticScore(patient!);
+	// 		return { prognosticScore, ...patient };
+	// 	});
+
+	const clinical = await api
+		.get("/patients/{patient_id}/clinical", {
+			path: { patient_id: params.patientId },
+		})
 		.then((patient) => {
 			const prognosticScore = getPrognosticScore(patient!);
 			return { prognosticScore, ...patient };

@@ -6,7 +6,9 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "vtb:api": "bunx typed-openapi http://localhost:8000/openapi.json -o ./app/services/vtbAPI.ts --default-fetcher vtbclient",
+    "vtb:zod": "bunx openapi-zod-client http://host.docker.internal:3658/export/openapi/828064/330 --export-schemas -o ./app/services/spotSchema.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.56",
