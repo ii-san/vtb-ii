@@ -5,10 +5,36 @@ import {
 	Outlet,
 	Scripts,
 	ScrollRestoration,
+	useRouteLoaderData,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { getSession } from "./sessions.server";
+
+function ClientTheme() {
+	return (
+		<script>
+			{`
+		const themeSet = (theme) => {
+			if (document.documentElement.dataset.themeControl === "SYSTEM") {
+				document.documentElement.dataset.theme = theme;
+			}
+		};
+
+		const tql = window.matchMedia("(prefers-color-scheme: light)");
+		const initialTheme = tql.matches ? "light" : "dark";
+		themeSet(initialTheme);
+
+		//add listener
+		tql.addEventListener("change", (e) => {
+			const theme = e.matches ? "light" : "dark";
+			themeSet(theme);
+		});
+		`}
+		</script>
+	);
+}
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -23,14 +49,28 @@ export const links: Route.LinksFunction = () => [
 	},
 ];
 
+export async function loader({ request }: Route.LoaderArgs) {
+	const session = await getSession(request.headers.get("Cookie"));
+	const ssrTheme = session.get("theme");
+	return { ssrTheme };
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+	const { ssrTheme } = useRouteLoaderData("root");
+
 	return (
-		<html lang="en">
+		<html
+			lang="en"
+			data-theme={ssrTheme || ""}
+			data-theme-control={ssrTheme ? "USER" : "SYSTEM"}
+			suppressHydrationWarning={true}
+		>
 			<head>
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<Meta />
 				<Links />
+				<ClientTheme />
 			</head>
 			<body>
 				{children}

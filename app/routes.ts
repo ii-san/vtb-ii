@@ -23,6 +23,7 @@ export default [
 		route("patients", "routes/patients/index.tsx"),
 		route("patients/:patientId/:detailTab?", "routes/patients/details.tsx"),
 	]),
+	route("api/settings", "routes/actions/preferences.ts"),
 ] satisfies RouteConfig;
 
 export const RouteNav = {

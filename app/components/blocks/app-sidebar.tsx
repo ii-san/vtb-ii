@@ -34,7 +34,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 									<img
 										src={logoLight}
 										alt="Sygnomics Precision Oncology"
-										className="block w-full"
+										className="block w-full dark:brightness-200"
 									/>
 								</div>
 							</a>
